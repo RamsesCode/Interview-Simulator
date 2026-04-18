@@ -21,7 +21,7 @@ export type InterviewSession = {
   total_score: number | null;
   started_at: string;
 };
-
+//test//
 export type CodingSession = {
   id: string;
   user_id: string;
