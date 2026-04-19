@@ -16,7 +16,7 @@ export function SiteHeader() {
           >
             <Brain className="h-5 w-5" />
           </span>
-          <span className="hidden sm:inline">AI Interview Simulator</span>
+          <span className="hidden sm:inline">Interviewly</span>
         </Link>
 
         <nav className="flex items-center gap-2">

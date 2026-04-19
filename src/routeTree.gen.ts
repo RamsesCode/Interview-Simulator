@@ -13,10 +13,16 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedInterviewRouteImport } from './routes/_authenticated/interview'
+import { Route as AuthenticatedDebuggingRouteImport } from './routes/_authenticated/debugging'
+import { Route as AuthenticatedDataStructuresAlgoRouteImport } from './routes/_authenticated/data-structures-algo'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCodingSpeedRoundRouteImport } from './routes/_authenticated/coding-speed-round'
 import { Route as AuthenticatedCodingRouteImport } from './routes/_authenticated/coding'
 import { Route as AuthenticatedInterviewSessionIdRouteImport } from './routes/_authenticated/interview.$sessionId'
+import { Route as AuthenticatedDebuggingSessionIdRouteImport } from './routes/_authenticated/debugging.$sessionId'
+import { Route as AuthenticatedDataStructuresAlgoSessionIdRouteImport } from './routes/_authenticated/data-structures-algo.$sessionId'
 import { Route as AuthenticatedCodingSessionIdRouteImport } from './routes/_authenticated/coding.$sessionId'
+import { Route as AuthenticatedCodingSpeedRoundSessionIdRouteImport } from './routes/_authenticated/coding-speed-round.$sessionId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -37,11 +43,28 @@ const AuthenticatedInterviewRoute = AuthenticatedInterviewRouteImport.update({
   path: '/interview',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedDebuggingRoute = AuthenticatedDebuggingRouteImport.update({
+  id: '/debugging',
+  path: '/debugging',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDataStructuresAlgoRoute =
+  AuthenticatedDataStructuresAlgoRouteImport.update({
+    id: '/data-structures-algo',
+    path: '/data-structures-algo',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedCodingSpeedRoundRoute =
+  AuthenticatedCodingSpeedRoundRouteImport.update({
+    id: '/coding-speed-round',
+    path: '/coding-speed-round',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCodingRoute = AuthenticatedCodingRouteImport.update({
   id: '/coding',
   path: '/coding',
@@ -53,29 +76,59 @@ const AuthenticatedInterviewSessionIdRoute =
     path: '/$sessionId',
     getParentRoute: () => AuthenticatedInterviewRoute,
   } as any)
+const AuthenticatedDebuggingSessionIdRoute =
+  AuthenticatedDebuggingSessionIdRouteImport.update({
+    id: '/$sessionId',
+    path: '/$sessionId',
+    getParentRoute: () => AuthenticatedDebuggingRoute,
+  } as any)
+const AuthenticatedDataStructuresAlgoSessionIdRoute =
+  AuthenticatedDataStructuresAlgoSessionIdRouteImport.update({
+    id: '/$sessionId',
+    path: '/$sessionId',
+    getParentRoute: () => AuthenticatedDataStructuresAlgoRoute,
+  } as any)
 const AuthenticatedCodingSessionIdRoute =
   AuthenticatedCodingSessionIdRouteImport.update({
     id: '/$sessionId',
     path: '/$sessionId',
     getParentRoute: () => AuthenticatedCodingRoute,
   } as any)
+const AuthenticatedCodingSpeedRoundSessionIdRoute =
+  AuthenticatedCodingSpeedRoundSessionIdRouteImport.update({
+    id: '/$sessionId',
+    path: '/$sessionId',
+    getParentRoute: () => AuthenticatedCodingSpeedRoundRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/coding': typeof AuthenticatedCodingRouteWithChildren
+  '/coding-speed-round': typeof AuthenticatedCodingSpeedRoundRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/data-structures-algo': typeof AuthenticatedDataStructuresAlgoRouteWithChildren
+  '/debugging': typeof AuthenticatedDebuggingRouteWithChildren
   '/interview': typeof AuthenticatedInterviewRouteWithChildren
+  '/coding-speed-round/$sessionId': typeof AuthenticatedCodingSpeedRoundSessionIdRoute
   '/coding/$sessionId': typeof AuthenticatedCodingSessionIdRoute
+  '/data-structures-algo/$sessionId': typeof AuthenticatedDataStructuresAlgoSessionIdRoute
+  '/debugging/$sessionId': typeof AuthenticatedDebuggingSessionIdRoute
   '/interview/$sessionId': typeof AuthenticatedInterviewSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/coding': typeof AuthenticatedCodingRouteWithChildren
+  '/coding-speed-round': typeof AuthenticatedCodingSpeedRoundRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/data-structures-algo': typeof AuthenticatedDataStructuresAlgoRouteWithChildren
+  '/debugging': typeof AuthenticatedDebuggingRouteWithChildren
   '/interview': typeof AuthenticatedInterviewRouteWithChildren
+  '/coding-speed-round/$sessionId': typeof AuthenticatedCodingSpeedRoundSessionIdRoute
   '/coding/$sessionId': typeof AuthenticatedCodingSessionIdRoute
+  '/data-structures-algo/$sessionId': typeof AuthenticatedDataStructuresAlgoSessionIdRoute
+  '/debugging/$sessionId': typeof AuthenticatedDebuggingSessionIdRoute
   '/interview/$sessionId': typeof AuthenticatedInterviewSessionIdRoute
 }
 export interface FileRoutesById {
@@ -84,9 +137,15 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/coding': typeof AuthenticatedCodingRouteWithChildren
+  '/_authenticated/coding-speed-round': typeof AuthenticatedCodingSpeedRoundRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/data-structures-algo': typeof AuthenticatedDataStructuresAlgoRouteWithChildren
+  '/_authenticated/debugging': typeof AuthenticatedDebuggingRouteWithChildren
   '/_authenticated/interview': typeof AuthenticatedInterviewRouteWithChildren
+  '/_authenticated/coding-speed-round/$sessionId': typeof AuthenticatedCodingSpeedRoundSessionIdRoute
   '/_authenticated/coding/$sessionId': typeof AuthenticatedCodingSessionIdRoute
+  '/_authenticated/data-structures-algo/$sessionId': typeof AuthenticatedDataStructuresAlgoSessionIdRoute
+  '/_authenticated/debugging/$sessionId': typeof AuthenticatedDebuggingSessionIdRoute
   '/_authenticated/interview/$sessionId': typeof AuthenticatedInterviewSessionIdRoute
 }
 export interface FileRouteTypes {
@@ -95,18 +154,30 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/coding'
+    | '/coding-speed-round'
     | '/dashboard'
+    | '/data-structures-algo'
+    | '/debugging'
     | '/interview'
+    | '/coding-speed-round/$sessionId'
     | '/coding/$sessionId'
+    | '/data-structures-algo/$sessionId'
+    | '/debugging/$sessionId'
     | '/interview/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/coding'
+    | '/coding-speed-round'
     | '/dashboard'
+    | '/data-structures-algo'
+    | '/debugging'
     | '/interview'
+    | '/coding-speed-round/$sessionId'
     | '/coding/$sessionId'
+    | '/data-structures-algo/$sessionId'
+    | '/debugging/$sessionId'
     | '/interview/$sessionId'
   id:
     | '__root__'
@@ -114,9 +185,15 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/coding'
+    | '/_authenticated/coding-speed-round'
     | '/_authenticated/dashboard'
+    | '/_authenticated/data-structures-algo'
+    | '/_authenticated/debugging'
     | '/_authenticated/interview'
+    | '/_authenticated/coding-speed-round/$sessionId'
     | '/_authenticated/coding/$sessionId'
+    | '/_authenticated/data-structures-algo/$sessionId'
+    | '/_authenticated/debugging/$sessionId'
     | '/_authenticated/interview/$sessionId'
   fileRoutesById: FileRoutesById
 }
@@ -156,11 +233,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInterviewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/debugging': {
+      id: '/_authenticated/debugging'
+      path: '/debugging'
+      fullPath: '/debugging'
+      preLoaderRoute: typeof AuthenticatedDebuggingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/data-structures-algo': {
+      id: '/_authenticated/data-structures-algo'
+      path: '/data-structures-algo'
+      fullPath: '/data-structures-algo'
+      preLoaderRoute: typeof AuthenticatedDataStructuresAlgoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/coding-speed-round': {
+      id: '/_authenticated/coding-speed-round'
+      path: '/coding-speed-round'
+      fullPath: '/coding-speed-round'
+      preLoaderRoute: typeof AuthenticatedCodingSpeedRoundRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/coding': {
@@ -177,12 +275,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInterviewSessionIdRouteImport
       parentRoute: typeof AuthenticatedInterviewRoute
     }
+    '/_authenticated/debugging/$sessionId': {
+      id: '/_authenticated/debugging/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/debugging/$sessionId'
+      preLoaderRoute: typeof AuthenticatedDebuggingSessionIdRouteImport
+      parentRoute: typeof AuthenticatedDebuggingRoute
+    }
+    '/_authenticated/data-structures-algo/$sessionId': {
+      id: '/_authenticated/data-structures-algo/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/data-structures-algo/$sessionId'
+      preLoaderRoute: typeof AuthenticatedDataStructuresAlgoSessionIdRouteImport
+      parentRoute: typeof AuthenticatedDataStructuresAlgoRoute
+    }
     '/_authenticated/coding/$sessionId': {
       id: '/_authenticated/coding/$sessionId'
       path: '/$sessionId'
       fullPath: '/coding/$sessionId'
       preLoaderRoute: typeof AuthenticatedCodingSessionIdRouteImport
       parentRoute: typeof AuthenticatedCodingRoute
+    }
+    '/_authenticated/coding-speed-round/$sessionId': {
+      id: '/_authenticated/coding-speed-round/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/coding-speed-round/$sessionId'
+      preLoaderRoute: typeof AuthenticatedCodingSpeedRoundSessionIdRouteImport
+      parentRoute: typeof AuthenticatedCodingSpeedRoundRoute
     }
   }
 }
@@ -197,6 +316,50 @@ const AuthenticatedCodingRouteChildren: AuthenticatedCodingRouteChildren = {
 
 const AuthenticatedCodingRouteWithChildren =
   AuthenticatedCodingRoute._addFileChildren(AuthenticatedCodingRouteChildren)
+
+interface AuthenticatedCodingSpeedRoundRouteChildren {
+  AuthenticatedCodingSpeedRoundSessionIdRoute: typeof AuthenticatedCodingSpeedRoundSessionIdRoute
+}
+
+const AuthenticatedCodingSpeedRoundRouteChildren: AuthenticatedCodingSpeedRoundRouteChildren =
+  {
+    AuthenticatedCodingSpeedRoundSessionIdRoute:
+      AuthenticatedCodingSpeedRoundSessionIdRoute,
+  }
+
+const AuthenticatedCodingSpeedRoundRouteWithChildren =
+  AuthenticatedCodingSpeedRoundRoute._addFileChildren(
+    AuthenticatedCodingSpeedRoundRouteChildren,
+  )
+
+interface AuthenticatedDataStructuresAlgoRouteChildren {
+  AuthenticatedDataStructuresAlgoSessionIdRoute: typeof AuthenticatedDataStructuresAlgoSessionIdRoute
+}
+
+const AuthenticatedDataStructuresAlgoRouteChildren: AuthenticatedDataStructuresAlgoRouteChildren =
+  {
+    AuthenticatedDataStructuresAlgoSessionIdRoute:
+      AuthenticatedDataStructuresAlgoSessionIdRoute,
+  }
+
+const AuthenticatedDataStructuresAlgoRouteWithChildren =
+  AuthenticatedDataStructuresAlgoRoute._addFileChildren(
+    AuthenticatedDataStructuresAlgoRouteChildren,
+  )
+
+interface AuthenticatedDebuggingRouteChildren {
+  AuthenticatedDebuggingSessionIdRoute: typeof AuthenticatedDebuggingSessionIdRoute
+}
+
+const AuthenticatedDebuggingRouteChildren: AuthenticatedDebuggingRouteChildren =
+  {
+    AuthenticatedDebuggingSessionIdRoute: AuthenticatedDebuggingSessionIdRoute,
+  }
+
+const AuthenticatedDebuggingRouteWithChildren =
+  AuthenticatedDebuggingRoute._addFileChildren(
+    AuthenticatedDebuggingRouteChildren,
+  )
 
 interface AuthenticatedInterviewRouteChildren {
   AuthenticatedInterviewSessionIdRoute: typeof AuthenticatedInterviewSessionIdRoute
@@ -214,13 +377,21 @@ const AuthenticatedInterviewRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCodingRoute: typeof AuthenticatedCodingRouteWithChildren
+  AuthenticatedCodingSpeedRoundRoute: typeof AuthenticatedCodingSpeedRoundRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDataStructuresAlgoRoute: typeof AuthenticatedDataStructuresAlgoRouteWithChildren
+  AuthenticatedDebuggingRoute: typeof AuthenticatedDebuggingRouteWithChildren
   AuthenticatedInterviewRoute: typeof AuthenticatedInterviewRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCodingRoute: AuthenticatedCodingRouteWithChildren,
+  AuthenticatedCodingSpeedRoundRoute:
+    AuthenticatedCodingSpeedRoundRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDataStructuresAlgoRoute:
+    AuthenticatedDataStructuresAlgoRouteWithChildren,
+  AuthenticatedDebuggingRoute: AuthenticatedDebuggingRouteWithChildren,
   AuthenticatedInterviewRoute: AuthenticatedInterviewRouteWithChildren,
 }
 

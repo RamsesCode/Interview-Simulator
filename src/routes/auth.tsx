@@ -8,7 +8,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — AI Interview Simulator" },
+      { title: "Sign in — Interviewly" },
       {
         name: "description",
         content: "Sign in with Google to start practicing interviews.",

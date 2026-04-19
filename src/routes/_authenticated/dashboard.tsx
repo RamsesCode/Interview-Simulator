@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Mic, ArrowRight, Trophy, Cpu } from "lucide-react";
+import { Mic, ArrowRight, Trophy, Cpu, Bug, Zap, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { listInterviewSessions } from "@/lib/localData";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
-    meta: [{ title: "Dashboard — AI Interview Simulator" }],
+    meta: [{ title: "Dashboard — Interviewly" }],
   }),
   component: DashboardPage,
 });
@@ -52,7 +52,7 @@ function DashboardPage() {
         <p className="mt-1 text-muted-foreground">Pick a mode and start practicing.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <ActionCard
           to="/interview"
           icon={<Mic className="h-6 w-6" />}
@@ -64,6 +64,24 @@ function DashboardPage() {
           icon={<Cpu className="h-6 w-6" />}
           title="Tech Interview Practice"
           description="Live technical interviewer with coding prompts, language choice, and guided hints."
+        />
+        <ActionCard
+          to="/debugging"
+          icon={<Bug className="h-6 w-6" />}
+          title="Debugging Challenge"
+          description="Fix real-world bugs and learn debugging thinking from a senior engineer."
+        />
+        <ActionCard
+          to="/coding-speed-round"
+          icon={<Zap className="h-6 w-6" />}
+          title="Speed Round"
+          description="Timed coding challenges to build speed and accuracy under pressure."
+        />
+        <ActionCard
+          to="/data-structures-algo"
+          icon={<BookOpen className="h-6 w-6" />}
+          title="DS&A Drills"
+          description="Structured learning with guided problems and progressive hints."
         />
       </div>
 
@@ -105,7 +123,7 @@ function ActionCard({
   title,
   description,
 }: {
-  to: "/interview" | "/coding";
+  to: "/interview" | "/coding" | "/debugging" | "/coding-speed-round" | "/data-structures-algo";
   icon: React.ReactNode;
   title: string;
   description: string;

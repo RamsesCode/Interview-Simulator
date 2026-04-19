@@ -7,13 +7,13 @@ import heroBg from "@/assets/hero-bg.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AI Interview Simulator — Practice Tech Interviews with AI" },
+      { title: "Interviewly — Practice Tech Interviews with AI" },
       {
         name: "description",
         content:
           "Prepare for technical interviews with an AI voice interviewer and detailed scoring tailored to your target role.",
       },
-      { property: "og:title", content: "AI Interview Simulator" },
+      { property: "og:title", content: "Interviewly" },
       {
         property: "og:description",
         content:
@@ -126,7 +126,7 @@ function LandingPage() {
       </section>
 
       <footer className="border-t border-border/50 py-10 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} AI Interview Simulator
+        © {new Date().getFullYear()} Interviewly
       </footer>
     </div>
   );

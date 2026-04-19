@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/interview/$sessionId")({
   head: () => ({
-    meta: [{ title: "Interview in progress — AI Interview Simulator" }],
+    meta: [{ title: "Interview in progress — Interviewly" }],
   }),
   component: InterviewSessionPage,
 });

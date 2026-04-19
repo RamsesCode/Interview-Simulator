@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/coding/$sessionId")({
   head: () => ({
-    meta: [{ title: "Tech Interview Practice — AI Interview Simulator" }],
+    meta: [{ title: "Tech Interview Practice — Interviewly" }],
   }),
   component: TechInterviewSessionPage,
 });

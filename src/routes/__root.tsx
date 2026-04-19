@@ -32,14 +32,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AI Interview Simulator" },
+      { title: "Interviewly" },
       {
         name: "description",
         content:
           "Practice technical interviews with an AI voice interviewer and get real-time coding feedback.",
       },
-      { name: "author", content: "AI Interview Simulator" },
-      { property: "og:title", content: "AI Interview Simulator" },
+      { name: "author", content: "Interviewly" },
+      { property: "og:title", content: "Interviewly" },
       {
         property: "og:description",
         content:
