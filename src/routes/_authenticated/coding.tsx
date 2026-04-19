@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Conversation as ElevenConversation, Mode } from "@elevenlabs/client";
 import { Cpu, ArrowRight, Mic, Terminal, CheckCircle2 } from "lucide-react";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/coding")({
 
 function TechInterviewSetupPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [launching, setLaunching] = useState(false);
   const [launched, setLaunched] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -79,7 +80,7 @@ function TechInterviewSetupPage() {
 
   const startTechInterview = async () => {
     if (!user) {
-      toast.error("You need to be signed in to start a technical interview.");
+      await navigate({ to: "/auth" });
       return;
     }
 
@@ -359,7 +360,7 @@ function TechInterviewSetupPage() {
   }
 
   return (
-    <main className="container mx-auto max-w-6xl px-4 py-8">
+    <main className="container mx-auto max-w-6xl px-4 py-4">
       <div className="rounded-2xl border border-border/60 bg-card p-6" style={{ boxShadow: "var(--shadow-elegant)" }}>
         {errorMessage && <p className="mt-3 text-sm text-destructive">{errorMessage}</p>}
 
@@ -445,24 +446,24 @@ function TechInterviewSetupPage() {
           </div>
         </div>
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-border/60 bg-[oklch(0.14_0.02_260)] text-[oklch(0.95_0.02_260)] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 bg-black/30 px-4 py-2.5">
-              <div className="flex items-center gap-2 text-xs text-white/70">
+        <section className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-[#1e1e1e] text-[#d4d4d4] shadow-2xl" style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+            <div className="flex items-center justify-between border-b border-white/5 bg-[#252526] px-4 py-3">
+              <div className="flex items-center gap-2 text-xs text-[#858585]">
                 <Terminal className="h-4 w-4" />
-                tech-interview.{extFor(selectedLanguage)}
+                <span className="font-mono">tech-interview.{extFor(selectedLanguage)}</span>
               </div>
-              <p className="text-xs text-white/60">Real-time coding workspace</p>
+              <p className="text-xs text-[#6a6a6a]">Real-time coding workspace</p>
             </div>
 
-            <div className="relative min-h-[64vh] bg-[oklch(0.13_0.02_260)]">
+            <div className="relative min-h-[64vh] bg-[#1e1e1e] overflow-hidden">
               <pre
                 ref={highlightedPreRef}
                 aria-hidden
-                className="pointer-events-none min-h-[64vh] overflow-auto p-5 font-mono text-sm leading-6"
+                className="pointer-events-none min-h-[64vh] overflow-auto px-4 py-5 font-mono text-sm leading-7"
                 style={{
-                  fontFamily:
-                    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace",
+                  fontFamily: "ui-monospace, 'Monaco', 'Menlo', 'Consolas', 'Liberation Mono', monospace",
                   tabSize: 2,
+                  letterSpacing: "0.3px",
                 }}
                 dangerouslySetInnerHTML={{ __html: withLineNumbers(highlightedCode || " ") }}
               />
@@ -480,11 +481,11 @@ function TechInterviewSetupPage() {
                 }}
                 wrap="off"
                 spellCheck={false}
-                className="absolute inset-0 min-h-[64vh] w-full resize-none overflow-auto bg-transparent p-5 pl-[74px] font-mono text-sm leading-6 text-transparent caret-[oklch(0.95_0.03_260)] outline-none"
+                className="absolute inset-0 min-h-[64vh] w-full resize-none overflow-auto bg-transparent px-4 py-5 pl-[68px] font-mono text-sm leading-7 text-transparent caret-[#aeafad] outline-none focus:outline-none"
                 style={{
-                  fontFamily:
-                    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace",
+                  fontFamily: "ui-monospace, 'Monaco', 'Menlo', 'Consolas', 'Liberation Mono', monospace",
                   tabSize: 2,
+                  letterSpacing: "0.3px",
                 }}
               />
             </div>

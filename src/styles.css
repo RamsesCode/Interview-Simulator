@@ -351,21 +351,21 @@
 }
 
 .code-keyword {
-  color: oklch(0.78 0.13 216);
+  color: #569cd6;
   font-weight: 600;
 }
 
 .code-string {
-  color: oklch(0.84 0.15 152);
+  color: #ce9178;
 }
 
 .code-comment {
-  color: oklch(0.68 0.03 240);
+  color: #6a9955;
   font-style: italic;
 }
 
 .code-number {
-  color: oklch(0.82 0.13 65);
+  color: #b5cea8;
 }
 
 .code-line {
@@ -375,7 +375,7 @@
 }
 
 .code-ln {
-  color: oklch(0.62 0.03 250);
+  color: #858585;
   text-align: right;
   user-select: none;
 }
