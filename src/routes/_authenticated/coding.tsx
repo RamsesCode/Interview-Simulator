@@ -28,24 +28,47 @@ function TechInterviewSetupPage() {
 
   const conversationRef = useRef<ElevenConversation | null>(null);
   const statusRef = useRef(status);
+  const modeRef = useRef(mode);
   const codeSyncTimerRef = useRef<number | null>(null);
   const volumeLockTimerRef = useRef<number | null>(null);
+  const keepAliveTimerRef = useRef<number | null>(null);
+  const inactivityTimerRef = useRef<number | null>(null);
+  const reconnectTimerRef = useRef<number | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const reconnectingRef = useRef(false);
+  const shouldMaintainSessionRef = useRef(false);
+  const connectFnRef = useRef<(reason: "initial" | "reconnect") => Promise<void>>(async () => {});
+  const lastActivityAtRef = useRef(0);
+  const lastInactivityNudgeAtRef = useRef(0);
+  const lastAgentMessageRef = useRef("");
   const pendingIntroRef = useRef<{ context: string; user: string } | null>(null);
+  const userHasEditedCodeRef = useRef(false);
+  const lastSentCodeRef = useRef("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const highlightedPreRef = useRef<HTMLPreElement | null>(null);
 
   const TECH_AGENT_ID =
     import.meta.env.VITE_ELEVENLABS_TECH_AGENT_ID || "agent_7101kpj1m23mfjsvm90s5de288e9";
+  const KEEPALIVE_MS = 12000;
+  const INACTIVITY_CHECK_MS = 8000;
+  const INACTIVITY_NUDGE_MS = 30000;
 
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
 
   useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
+  useEffect(() => {
     return () => {
+      shouldMaintainSessionRef.current = false;
+      stopReconnectTimer(reconnectTimerRef);
       if (codeSyncTimerRef.current) {
         window.clearTimeout(codeSyncTimerRef.current);
       }
+      stopSessionMaintenance(keepAliveTimerRef, inactivityTimerRef);
       stopVolumeLock(volumeLockTimerRef);
       if (conversationRef.current) {
         void conversationRef.current.endSession();
@@ -75,6 +98,8 @@ function TechInterviewSetupPage() {
 
       setSessionId(data.id);
       setCode(data.final_code ?? defaultTemplate("python"));
+      userHasEditedCodeRef.current = false;
+      lastSentCodeRef.current = "";
       setLaunched(true);
       toast.success("Technical workspace is ready.");
     } catch (error) {
@@ -84,7 +109,22 @@ function TechInterviewSetupPage() {
     }
   };
 
-  const beginTechnicalInterview = useCallback(async () => {
+  const scheduleReconnect = () => {
+    if (!shouldMaintainSessionRef.current) return;
+    if (reconnectTimerRef.current) return;
+
+    const attempt = reconnectAttemptsRef.current + 1;
+    reconnectAttemptsRef.current = attempt;
+    reconnectingRef.current = true;
+    const delay = Math.min(700 * 2 ** (attempt - 1), 5000);
+
+    reconnectTimerRef.current = window.setTimeout(() => {
+      reconnectTimerRef.current = null;
+      void connectFnRef.current("reconnect");
+    }, delay);
+  };
+
+  const connectTechnicalInterview = useCallback(async (reason: "initial" | "reconnect") => {
     if (statusRef.current === "connecting" || statusRef.current === "live") return;
 
     setStatus("connecting");
@@ -100,7 +140,11 @@ function TechInterviewSetupPage() {
 
       const { Conversation } = await import("@elevenlabs/client");
       const selectedLanguageLabel = languageLabel(selectedLanguage);
-      const introContext = `You are a realistic technical interviewer. The candidate selected ${selectedLanguageLabel} and you must fully support that choice. Never ask them to switch to Python or another language unless the candidate explicitly requests a switch. Ask one coding question at a time in ${selectedLanguageLabel}. Wait for the candidate to think and type. Monitor their code progress from context updates and provide short, occasional interviewer-style nudges only when necessary. Do not reveal full solutions unless explicitly asked. After a solution attempt, ask the candidate to explain complexity and possible improvements. Do not require unnecessary C++ boilerplate like '#include <bits/stdc++.h>' or 'using namespace std;' unless the candidate explicitly asks for full boilerplate.`;
+      const resumeContext =
+        reason === "reconnect"
+          ? `The prior realtime socket disconnected unexpectedly. Resume the same ongoing interview without restarting from introductions. Last known interviewer prompt: ${lastAgentMessageRef.current || "<none>"}. Current candidate code snapshot:\n${code.slice(0, 900) || "<empty>"}`
+          : "";
+      const introContext = `You are a realistic technical interviewer. The candidate selected ${selectedLanguageLabel} and you must fully support that choice. Never ask them to switch to Python or another language unless the candidate explicitly requests a switch. Ask one coding question at a time in ${selectedLanguageLabel}. Wait for the candidate to think and type. Monitor their code progress from context updates and provide short, occasional interviewer-style nudges only when necessary. Do not reveal full solutions unless explicitly asked. After a solution attempt, ask the candidate to explain complexity and possible improvements. Do not require unnecessary C++ boilerplate like '#include <bits/stdc++.h>' or 'using namespace std;' unless the candidate explicitly asks for full boilerplate.${resumeContext ? `\n${resumeContext}` : ""}`;
       const introUser = `I am ready for a technical interview in ${selectedLanguageLabel}. Please ask the first coding question and then wait for me to code in ${selectedLanguageLabel}.`;
       pendingIntroRef.current = { context: introContext, user: introUser };
 
@@ -114,7 +158,22 @@ function TechInterviewSetupPage() {
           },
           onConnect: () => {
             setStatus("live");
+            setErrorMessage(null);
+            reconnectAttemptsRef.current = 0;
+            reconnectingRef.current = false;
+            stopReconnectTimer(reconnectTimerRef);
             startVolumeLock(volumeLockTimerRef, conversationRef);
+            startSessionMaintenance({
+              keepAliveTimerRef,
+              inactivityTimerRef,
+              conversationRef,
+              lastActivityAtRef,
+              lastInactivityNudgeAtRef,
+              modeRef,
+              KEEPALIVE_MS,
+              INACTIVITY_CHECK_MS,
+              INACTIVITY_NUDGE_MS,
+            });
             const intro = pendingIntroRef.current;
             if (intro && conversationRef.current) {
               safeSendContextualUpdate(conversationRef.current, intro.context);
@@ -127,17 +186,38 @@ function TechInterviewSetupPage() {
             setMode(mode);
             enforceConversationVolume(conversationRef.current);
           },
+          onMessage: ({ role, message }) => {
+            lastActivityAtRef.current = Date.now();
+            if (role === "agent" && message?.trim()) {
+              lastAgentMessageRef.current = message.trim();
+            }
+          },
           onDisconnect: () => {
             stopVolumeLock(volumeLockTimerRef);
             stopCodeSyncTimer(codeSyncTimerRef);
+            stopSessionMaintenance(keepAliveTimerRef, inactivityTimerRef);
             pendingIntroRef.current = null;
             conversationRef.current = null;
+
+            if (shouldMaintainSessionRef.current) {
+              scheduleReconnect();
+              return;
+            }
+
             setStatus((prev) => (prev === "error" ? "error" : "ended"));
           },
           onError: (message) => {
             stopVolumeLock(volumeLockTimerRef);
             stopCodeSyncTimer(codeSyncTimerRef);
+            stopSessionMaintenance(keepAliveTimerRef, inactivityTimerRef);
             pendingIntroRef.current = null;
+
+            if (shouldMaintainSessionRef.current) {
+              reconnectingRef.current = true;
+              scheduleReconnect();
+              return;
+            }
+
             setStatus("error");
             setErrorMessage(message);
             toast.error("Technical interviewer connection failed");
@@ -150,14 +230,34 @@ function TechInterviewSetupPage() {
       startVolumeLock(volumeLockTimerRef, conversationRef);
     } catch (error) {
       pendingIntroRef.current = null;
-      setStatus("error");
       const message = error instanceof Error ? error.message : "Unable to start technical interviewer.";
-      setErrorMessage(message);
-      toast.error(message);
+      if (shouldMaintainSessionRef.current && reason === "reconnect") {
+        reconnectingRef.current = true;
+        scheduleReconnect();
+      } else {
+        setStatus("error");
+        setErrorMessage(message);
+        toast.error(message);
+      }
     }
-  }, [TECH_AGENT_ID, selectedLanguage]);
+  }, [TECH_AGENT_ID, selectedLanguage, code]);
+
+  useEffect(() => {
+    connectFnRef.current = connectTechnicalInterview;
+  }, [connectTechnicalInterview]);
+
+  const beginTechnicalInterview = async () => {
+    shouldMaintainSessionRef.current = true;
+    reconnectAttemptsRef.current = 0;
+    stopReconnectTimer(reconnectTimerRef);
+    await connectTechnicalInterview("initial");
+  };
 
   const endTechnicalInterview = async () => {
+    shouldMaintainSessionRef.current = false;
+    reconnectingRef.current = false;
+    stopReconnectTimer(reconnectTimerRef);
+    stopSessionMaintenance(keepAliveTimerRef, inactivityTimerRef);
     if (!conversationRef.current) return;
     stopCodeSyncTimer(codeSyncTimerRef);
     pendingIntroRef.current = null;
@@ -171,6 +271,8 @@ function TechInterviewSetupPage() {
   const onLanguageChange = (language: "python" | "cpp" | "javascript") => {
     setSelectedLanguage(language);
     setCode(defaultTemplate(language));
+    userHasEditedCodeRef.current = false;
+    lastSentCodeRef.current = "";
     textareaRef.current?.focus();
 
     if (conversationRef.current && status === "live") {
@@ -197,7 +299,9 @@ function TechInterviewSetupPage() {
 
   useEffect(() => {
     stopCodeSyncTimer(codeSyncTimerRef);
-    if (!conversationRef.current || status !== "live") return;
+    if (!conversationRef.current || status !== "live" || mode === "speaking") return;
+    if (!userHasEditedCodeRef.current) return;
+    if (code === lastSentCodeRef.current) return;
 
     codeSyncTimerRef.current = window.setTimeout(() => {
       if (!conversationRef.current || !conversationRef.current.isOpen()) return;
@@ -207,12 +311,13 @@ function TechInterviewSetupPage() {
         conversationRef.current,
         `Candidate is coding in ${languageLabel(selectedLanguage)}. Current code:\n${snippet || "<empty>"}\nAssess progress quietly. Only provide concise guidance if needed and avoid interrupting too frequently.`,
       );
+      lastSentCodeRef.current = code;
     }, 900);
 
     return () => {
       stopCodeSyncTimer(codeSyncTimerRef);
     };
-  }, [code, selectedLanguage, status]);
+  }, [code, selectedLanguage, status, mode]);
 
   const highlightedCode = useMemo(() => {
     return highlightCode(code, selectedLanguage);
@@ -364,7 +469,10 @@ function TechInterviewSetupPage() {
               <textarea
                 ref={textareaRef}
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => {
+                  userHasEditedCodeRef.current = true;
+                  setCode(e.target.value);
+                }}
                 onScroll={(event) => {
                   if (!highlightedPreRef.current) return;
                   highlightedPreRef.current.scrollTop = event.currentTarget.scrollTop;
@@ -454,8 +562,8 @@ async function requestMicrophonePermission() {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         autoGainControl: false,
-        noiseSuppression: false,
-        echoCancellation: false,
+        noiseSuppression: true,
+        echoCancellation: true,
       },
     });
     stream.getTracks().forEach((track) => track.stop());
@@ -491,8 +599,8 @@ async function withStableMicCapture<T>(action: () => Promise<T>): Promise<T> {
       next.audio = {
         ...audioConstraints,
         autoGainControl: false,
-        noiseSuppression: false,
-        echoCancellation: false,
+        noiseSuppression: true,
+        echoCancellation: true,
       };
     }
 
@@ -534,6 +642,74 @@ function stopVolumeLock(timerRef: { current: number | null }) {
   timerRef.current = null;
 }
 
+function stopReconnectTimer(timerRef: { current: number | null }) {
+  if (!timerRef.current) return;
+  window.clearTimeout(timerRef.current);
+  timerRef.current = null;
+}
+
+function startSessionMaintenance({
+  keepAliveTimerRef,
+  inactivityTimerRef,
+  conversationRef,
+  lastActivityAtRef,
+  lastInactivityNudgeAtRef,
+  modeRef,
+  KEEPALIVE_MS,
+  INACTIVITY_CHECK_MS,
+  INACTIVITY_NUDGE_MS,
+}: {
+  keepAliveTimerRef: { current: number | null };
+  inactivityTimerRef: { current: number | null };
+  conversationRef: { current: ElevenConversation | null };
+  lastActivityAtRef: { current: number };
+  lastInactivityNudgeAtRef: { current: number };
+  modeRef: { current: Mode };
+  KEEPALIVE_MS: number;
+  INACTIVITY_CHECK_MS: number;
+  INACTIVITY_NUDGE_MS: number;
+}) {
+  stopSessionMaintenance(keepAliveTimerRef, inactivityTimerRef);
+  lastActivityAtRef.current = Date.now();
+  lastInactivityNudgeAtRef.current = 0;
+
+  keepAliveTimerRef.current = window.setInterval(() => {
+    const conversation = conversationRef.current;
+    if (!conversation || !conversation.isOpen()) return;
+    safeSendUserActivity(conversation);
+  }, KEEPALIVE_MS);
+
+  inactivityTimerRef.current = window.setInterval(() => {
+    const conversation = conversationRef.current;
+    if (!conversation || !conversation.isOpen()) return;
+    if (modeRef.current === "speaking") return;
+
+    const now = Date.now();
+    if (now - lastActivityAtRef.current < INACTIVITY_NUDGE_MS) return;
+    if (now - lastInactivityNudgeAtRef.current < INACTIVITY_NUDGE_MS) return;
+
+    safeSendContextualUpdate(
+      conversation,
+      "Continue the technical interview naturally with the next question or a follow-up based on the candidate's latest answer and code. Keep it concise and realistic.",
+    );
+    lastInactivityNudgeAtRef.current = now;
+  }, INACTIVITY_CHECK_MS);
+}
+
+function stopSessionMaintenance(
+  keepAliveTimerRef: { current: number | null },
+  inactivityTimerRef: { current: number | null },
+) {
+  if (keepAliveTimerRef.current) {
+    window.clearInterval(keepAliveTimerRef.current);
+    keepAliveTimerRef.current = null;
+  }
+  if (inactivityTimerRef.current) {
+    window.clearInterval(inactivityTimerRef.current);
+    inactivityTimerRef.current = null;
+  }
+}
+
 function stopCodeSyncTimer(timerRef: { current: number | null }) {
   if (!timerRef.current) return;
   window.clearTimeout(timerRef.current);
@@ -555,6 +731,16 @@ function safeSendUserMessage(conversation: ElevenConversation, text: string) {
 
   try {
     conversation.sendUserMessage(text);
+  } catch {
+    // Ignore send failures during close transitions.
+  }
+}
+
+function safeSendUserActivity(conversation: ElevenConversation) {
+  if (!conversation.isOpen()) return;
+
+  try {
+    conversation.sendUserActivity();
   } catch {
     // Ignore send failures during close transitions.
   }
