@@ -29,12 +29,12 @@ export function SiteHeader() {
               </Link>
               <Link to="/interview">
                 <Button variant="ghost" size="sm">
-                  Interview
+                  Behavioral Interview
                 </Button>
               </Link>
               <Link to="/coding">
                 <Button variant="ghost" size="sm">
-                  Coding
+                  Tech Interview Practice
                 </Button>
               </Link>
               <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out">

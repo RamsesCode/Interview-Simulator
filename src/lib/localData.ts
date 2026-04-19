@@ -38,6 +38,18 @@ const CURRENT_USER_KEY = "ai_interview_current_user";
 const INTERVIEWS_KEY = "ai_interview_sessions";
 const CODING_KEY = "ai_coding_sessions";
 
+function createId() {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+  } catch {
+    // Fall back to timestamp-based ID.
+  }
+
+  return `id_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
@@ -98,7 +110,7 @@ export function signUpLocal(name: string, email: string, password: string): Loca
   }
 
   const account: LocalAccount = {
-    id: crypto.randomUUID(),
+    id: createId(),
     name: name.trim(),
     email: normalizedEmail,
     password,
@@ -138,7 +150,7 @@ function setInterviewSessions(sessions: InterviewSession[]) {
 
 export function createInterviewSession(userId: string, jobRole: string): InterviewSession {
   const session: InterviewSession = {
-    id: crypto.randomUUID(),
+    id: createId(),
     user_id: userId,
     job_role: jobRole,
     status: "in_progress",
@@ -178,7 +190,7 @@ export function createCodingSession(
   language: string,
 ): CodingSession {
   const session: CodingSession = {
-    id: crypto.randomUUID(),
+    id: createId(),
     user_id: userId,
     problem_title: problemTitle,
     problem_description: problemDescription,

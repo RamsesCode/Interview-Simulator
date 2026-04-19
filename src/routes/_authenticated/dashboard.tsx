@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Mic, Code2, ArrowRight, Trophy } from "lucide-react";
+import { Mic, ArrowRight, Trophy, Cpu } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { listCodingSessions, listInterviewSessions } from "@/lib/localData";
+import { listInterviewSessions } from "@/lib/localData";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -20,17 +20,9 @@ type InterviewRow = {
   started_at: string;
 };
 
-type CodingRow = {
-  id: string;
-  problem_title: string;
-  status: string;
-  started_at: string;
-};
-
 function DashboardPage() {
   const { user } = useAuth();
   const [interviews, setInterviews] = useState<InterviewRow[]>([]);
-  const [coding, setCoding] = useState<CodingRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,15 +39,7 @@ function DashboardPage() {
       started_at: s.started_at,
     }));
 
-    const coding = listCodingSessions(user.id, 5).map((s) => ({
-      id: s.id,
-      problem_title: s.problem_title,
-      status: s.status,
-      started_at: s.started_at,
-    }));
-
     setInterviews(interviews);
-    setCoding(coding);
     setLoading(false);
   }, [user]);
 
@@ -72,18 +56,18 @@ function DashboardPage() {
         <ActionCard
           to="/interview"
           icon={<Mic className="h-6 w-6" />}
-          title="New voice interview"
-          description="Pick a role and start a real-time spoken interview."
+          title="Behavioral Interview"
+          description="Practice storytelling, communication, and role-specific behavioral prompts."
         />
         <ActionCard
           to="/coding"
-          icon={<Code2 className="h-6 w-6" />}
-          title="New coding session"
-          description="Solve a problem with live AI feedback."
+          icon={<Cpu className="h-6 w-6" />}
+          title="Tech Interview Practice"
+          description="Live technical interviewer with coding prompts, language choice, and guided hints."
         />
       </div>
 
-      <div className="mt-12 grid gap-8 lg:grid-cols-2">
+      <div className="mt-12 grid gap-8 lg:grid-cols-1">
         <HistorySection
           title="Recent interviews"
           empty="No interviews yet — start your first one."
@@ -110,25 +94,6 @@ function DashboardPage() {
           ))}
         </HistorySection>
 
-        <HistorySection
-          title="Recent coding sessions"
-          empty="No coding sessions yet."
-          loading={loading}
-        >
-          {coding.map((row) => (
-            <li
-              key={row.id}
-              className="flex items-center justify-between rounded-lg border border-border/60 bg-card px-4 py-3"
-            >
-              <div>
-                <div className="font-medium">{row.problem_title}</div>
-                <div className="text-xs text-muted-foreground">
-                  {new Date(row.started_at).toLocaleString()} · {row.status}
-                </div>
-              </div>
-            </li>
-          ))}
-        </HistorySection>
       </div>
     </main>
   );

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Mic, Code2, Sparkles, Trophy, Brain, ArrowRight } from "lucide-react";
+import { Mic, Sparkles, Trophy, Brain, ArrowRight, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -11,13 +11,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Prepare for technical interviews with an AI voice interviewer, real-time coding feedback, and detailed scoring tailored to your target role.",
+          "Prepare for technical interviews with an AI voice interviewer and detailed scoring tailored to your target role.",
       },
       { property: "og:title", content: "AI Interview Simulator" },
       {
         property: "og:description",
         content:
-          "Practice job-specific interviews with voice AI and sharpen your coding skills with live feedback.",
+          "Practice job-specific interviews with voice AI and get realistic interview feedback.",
       },
     ],
   }),
@@ -64,8 +64,8 @@ function LandingPage() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground">
-              Practice voice-based interviews tailored to your target role and sharpen your coding
-              skills with real-time AI feedback.
+              Practice voice-based interviews tailored to your target role with realistic follow-up
+              questions and actionable feedback.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link to="/auth">
@@ -73,9 +73,9 @@ function LandingPage() {
                   Get started free <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/interview">
+              <Link to="/coding">
                 <Button size="lg" variant="outline">
-                  Try a mock interview
+                  Tech Interview Practice
                 </Button>
               </Link>
             </div>
@@ -88,17 +88,17 @@ function LandingPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <ModeCard
             icon={<Mic className="h-6 w-6" />}
-            title="Voice Interview"
-            description="Pick a role like Software Engineer or Data Scientist and have a real-time spoken interview. Get scored and detailed feedback per question."
+            title="Behavioral Interview"
+            description="Focus on communication, leadership stories, and structured answers with a live voice interviewer."
             ctaTo="/interview"
-            ctaLabel="Start interview"
+            ctaLabel="Start behavioral"
           />
           <ModeCard
-            icon={<Code2 className="h-6 w-6" />}
-            title="Coding Practice"
-            description="Solve LeetCode-style problems in a terminal-style editor with live AI feedback on syntax, structure, and approach."
+            icon={<Cpu className="h-6 w-6" />}
+            title="Tech Interview Practice"
+            description="Simulate a real engineering interview with coding questions, progressive difficulty, and live interviewer guidance."
             ctaTo="/coding"
-            ctaLabel="Open coding lab"
+            ctaLabel="Start technical"
           />
         </div>
       </section>
@@ -116,11 +116,6 @@ function LandingPage() {
             icon={<Mic className="h-5 w-5" />}
             title="Voice-activated"
             text="Speak your answers naturally, just like the real thing."
-          />
-          <Feature
-            icon={<Code2 className="h-5 w-5" />}
-            title="Live coding feedback"
-            text="Catch bugs and improve approach as you type."
           />
           <Feature
             icon={<Trophy className="h-5 w-5" />}

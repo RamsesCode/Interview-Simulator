@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isAuthenticated) {
           client.logout({
             logoutParams: {
-              returnTo: `${window.location.origin}/auth`,
+              returnTo: `${window.location.origin}/`,
             },
           });
           return;
